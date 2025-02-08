@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsnd --respawn --clear src/main.ts",
-    "build": "rimraf dist && tsup --minify --treeshake",
+    "dev": "tsnd -r tsconfig-paths/register --respawn --clear src/server/main.ts",
+    "build": "rimraf dist && tsup --minify --treeshake && tsc-alias -p tsconfig.json",
     "start": "node dist/main.js"
   },
   "keywords": [],
@@ -15,11 +15,13 @@
     "@types/node": "22.13.1",
     "rimraf": "6.0.1",
     "ts-node-dev": "2.0.0",
+    "tsc-alias": "1.8.10",
+    "tsconfig-paths": "4.2.0",
     "tsup": "8.3.6",
     "typescript": "5.7.3"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "dotenv": "16.4.7",
     "fastify": "5.2.1",
     "joi": "17.13.3"
   }
