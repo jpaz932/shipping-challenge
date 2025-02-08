@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { AuthController } from "./authController";
 import { validateDto } from "@src/common/middlewares/validateDto";
-import { RegisterUserDto } from "@src/auth/domain/dtos/register.dto";
+import { RegisterUserDto } from "@src/auth/domain/dtos/registerUser.dto";
 
 const controller = new AuthController();
 export const authRoutes = (fastify: FastifyInstance, opts: any, done: () => void) => {
