@@ -1,11 +1,14 @@
 import Fastify from 'fastify';
-import { envs } from './config/envs';
+import { envs } from '@src/config/envs';
+import { registerRoutes } from './routes/routes';
 
-const app = Fastify();
+const fastify = Fastify();
+
+registerRoutes(fastify);
 
 const start = async () => {
     try {
-        await app.listen({
+        await fastify.listen({
             port: envs.port,
         });
         console.log(`Server listening on port ${envs.port}`);
