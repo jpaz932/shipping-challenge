@@ -9,7 +9,7 @@ registerRoutes(fastify);
 
 const start = async () => {
     try {
-        await MysqlDatabase.connect({
+        MysqlDatabase.connect({
             host: envs.mysqlHost,
             user: envs.mysqlUser,
             password: envs.mysqlPassword,
@@ -25,4 +25,4 @@ const start = async () => {
     }
 };
 
-start();
+void start();

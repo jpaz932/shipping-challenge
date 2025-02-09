@@ -1,4 +1,4 @@
-export type SignToken = (payload: Object) => Promise<string | null>;
+export type SignToken = (payload: object) => Promise<string | null>;
 
 export interface UserToken {
     token: string;

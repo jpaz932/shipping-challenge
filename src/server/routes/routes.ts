@@ -1,8 +1,7 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance } from 'fastify';
 
-import { authRoutes } from "@src/auth/infrastructure/rest/authRoutes";
-import { AuthMiddleware } from "@src/common/middlewares/authMiddleware";
+import { authRoutes } from '@src/auth/infrastructure/rest/authRoutes';
 
 export const registerRoutes = (fastify: FastifyInstance) => {
     fastify.register(authRoutes, { prefix: '/api/auth' });
-}
+};

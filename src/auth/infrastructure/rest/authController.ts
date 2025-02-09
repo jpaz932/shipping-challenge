@@ -20,19 +20,19 @@ export class AuthController {
 
     registerUser = (request: FastifyRequest, reply: FastifyReply) => {
         const registerUserDto = request.body as RegisterUserDto;
-        
+
         new RegisterUser(this.authRepository)
             .execute(registerUserDto)
             .then((response) => reply.status(201).send(response))
             .catch((error) => this.handlerError(error, reply));
-    }
+    };
 
     loginUser = (request: FastifyRequest, reply: FastifyReply) => {
         const loginDto = request.body as LoginDto;
-        
+
         new LoginUser(this.authRepository)
             .execute(loginDto)
             .then((response) => reply.status(200).send(response))
             .catch((error) => this.handlerError(error, reply));
-    }
+    };
 }

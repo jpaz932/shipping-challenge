@@ -5,7 +5,6 @@ export class User {
         public document: number,
         public email: string,
         public password: string,
-        public status: boolean,
         public role: string,
         public is_active: boolean,
     ) {}
