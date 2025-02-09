@@ -10,7 +10,7 @@ interface Options {
 export class MysqlDatabase {
     private static pool: Pool;
 
-    static async connect(options: Options) {
+    static connect(options: Options) {
         try {
             this.pool = mysql.createPool(options);
             console.log('Connected to MySQL database');
