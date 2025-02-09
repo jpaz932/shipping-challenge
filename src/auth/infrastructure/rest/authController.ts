@@ -1,6 +1,8 @@
+import { RegisterUser } from '@src/auth/application/use-case/register';
 import { RegisterUserDto } from '@src/auth/domain/dtos/registerUser.dto';
 import { AuthRepository } from '@src/auth/domain/repositories/auth.repository';
 import { CustomError } from '@src/common/errors/custom.error';
+import { JwtAdapter } from '@src/utils/jwt';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 export class AuthController {
@@ -17,8 +19,10 @@ export class AuthController {
 
     registerUser = (request: FastifyRequest, reply: FastifyReply) => {
         const registerUserDto = request.body as RegisterUserDto;
-        this.authRepository.registerUser(registerUserDto)
-            .then((user) => reply.status(201).send(user))
+        
+        new RegisterUser(this.authRepository)
+            .execute(registerUserDto)
+            .then((response) => reply.status(201).send(response))
             .catch((error) => this.handlerError(error, reply));
     }
 
