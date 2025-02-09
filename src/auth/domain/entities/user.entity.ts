@@ -7,5 +7,6 @@ export class User {
         public password: string,
         public status: boolean,
         public role: string,
+        public is_active: boolean,
     ) {}
 }

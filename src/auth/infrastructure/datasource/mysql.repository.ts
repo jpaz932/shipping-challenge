@@ -93,6 +93,8 @@ export class MysqlAuthRepository implements IAuthRepository {
                 throw CustomError.badRequest('Wrong email or password');
             }
 
+            if (!userExist.is_active) throw CustomError.forbidden('User is not active');
+
             const match = BcryptAdapter.compare(loginDto.password, userExist.password);
             if (!match) {
                 throw CustomError.unauthorized('Wrong email or password');
