@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-    entry: ['src/main.ts'],
+    entry: ['src/server/main.ts'],
     tsconfig: 'tsconfig.json',
     outDir: 'dist',
     bundle: true,

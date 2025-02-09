@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsnd --respawn --clear src/main.ts",
-    "build": "rimraf dist && tsup --minify --treeshake",
+    "dev": "tsnd -r tsconfig-paths/register --respawn --clear src/server/main.ts",
+    "build": "rimraf dist && tsup --minify --treeshake && tsc-alias -p tsconfig.json",
     "start": "node dist/main.js"
   },
   "keywords": [],
@@ -12,15 +12,24 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/jsonwebtoken": "9.0.8",
     "@types/node": "22.13.1",
     "rimraf": "6.0.1",
     "ts-node-dev": "2.0.0",
+    "tsc-alias": "1.8.10",
+    "tsconfig-paths": "4.2.0",
     "tsup": "8.3.6",
     "typescript": "5.7.3"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "bcryptjs": "2.4.3",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.14.1",
+    "dotenv": "16.4.7",
     "fastify": "5.2.1",
-    "joi": "17.13.3"
+    "joi": "17.13.3",
+    "jsonwebtoken": "9.0.2",
+    "mysql2": "3.12.0"
   }
 }
