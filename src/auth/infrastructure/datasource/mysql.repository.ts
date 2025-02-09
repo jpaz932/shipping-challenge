@@ -3,8 +3,8 @@ import { User } from "@src/auth/domain/entities/user.entity";
 import { IAuthRepository } from "@src/auth/domain/interfaces/auth.interface";
 import { CustomError } from "@src/common/errors/custom.error";
 import { MysqlDatabase } from "@src/config/database/mysql";
+import { BcryptAdapter } from "@src/utils/bcrypt";
 import { Pool } from "mysql2/promise";
-
 export class MysqlAuthRepository implements IAuthRepository {
     private pool: Pool | null = null;
     
@@ -32,13 +32,12 @@ export class MysqlAuthRepository implements IAuthRepository {
 
     private createUser = async (user: RegisterUserDto): Promise<number> => {
         try {
-            const sql = 'INSERT INTO users (name, document, email, password, role) VALUES (?, ?, ?, ?, ?)';
+            const sql = 'INSERT INTO users (name, document, email, password) VALUES (?, ?, ?, ?)';
             const values = [
                 user.name, 
                 user.document, 
                 user.email, 
-                user.password, 
-                'User'
+                BcryptAdapter.hash(user.password),
             ];
 
             const [result]: any = await this.getPool().execute(
