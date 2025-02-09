@@ -1,10 +1,13 @@
 import { pathsToModuleNameMapper } from 'ts-jest';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.test' });
 
 export default {
     preset: 'ts-jest',
     testEnvironment: 'node',
     transform: {
-        '^.+.tsx?$': ['ts-jest', {}],
+        '^.+\\.tsx?$': ['ts-jest', {}],
     },
     roots: ['<rootDir>/tests'],
     modulePaths: ['.'],
