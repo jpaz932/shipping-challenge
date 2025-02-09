@@ -5,6 +5,7 @@ import { CustomError } from "@src/common/errors/custom.error";
 import { MysqlDatabase } from "@src/config/database/mysql";
 import { BcryptAdapter } from "@src/utils/bcrypt";
 import { Pool } from "mysql2/promise";
+
 export class MysqlAuthRepository implements IAuthRepository {
     private pool: Pool | null = null;
     
