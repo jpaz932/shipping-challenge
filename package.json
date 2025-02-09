@@ -5,22 +5,35 @@
   "scripts": {
     "dev": "tsnd -r tsconfig-paths/register --respawn --clear src/server/main.ts",
     "build": "rimraf dist && tsup --minify --treeshake && tsc-alias -p tsconfig.json",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "test": "jest",
+    "lint": "eslint  \"{src,test}/**/*.ts\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/eslintrc": "3.2.0",
+    "@eslint/js": "9.20.0",
     "@types/bcryptjs": "2.4.6",
+    "@types/jest": "29.5.14",
     "@types/jsonwebtoken": "9.0.8",
     "@types/node": "22.13.1",
+    "@typescript-eslint/parser": "8.23.0",
+    "eslint": "9.20.0",
+    "eslint-config-prettier": "10.0.1",
+    "eslint-plugin-prettier": "5.2.3",
+    "globals": "15.14.0",
+    "jest": "29.7.0",
     "rimraf": "6.0.1",
+    "ts-jest": "29.2.5",
     "ts-node-dev": "2.0.0",
     "tsc-alias": "1.8.10",
     "tsconfig-paths": "4.2.0",
     "tsup": "8.3.6",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "typescript-eslint": "8.23.0"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",

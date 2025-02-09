@@ -1,7 +1,7 @@
 export class CustomError extends Error {
     constructor(
         public readonly code: number,
-        public readonly message: string
+        public readonly message: string,
     ) {
         super(message);
     }
@@ -9,7 +9,7 @@ export class CustomError extends Error {
     static badRequest(message: string): CustomError {
         return new CustomError(400, message);
     }
-    
+
     static unauthorized(message: string): CustomError {
         return new CustomError(401, message);
     }
