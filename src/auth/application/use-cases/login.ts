@@ -1,32 +1,22 @@
-import { RegisterUserDto } from "@src/auth/domain/dtos/registerUser.dto";
 import { AuthRepository } from "@src/auth/domain/repositories/auth.repository";
 import { CustomError } from "@src/common/errors/custom.error";
 import { JwtAdapter } from "@src/utils/jwt";
+import { SignToken, UserToken } from "@src/auth/application/interfaces";
+import { LoginDto } from "@src/auth/domain/dtos/login.dto";
 
-type SignToken = (payload: Object) => Promise<string | null>;
-interface UserToken {
-    token: string;
-    user: {
-        id: number;
-        name: string;
-        email: string;
-    };
+interface LoginUserUseCase {
+    execute(loginDto: LoginDto): Promise<UserToken>;
 }
 
-interface RegisterUserUseCase {
-    execute(registerUserDto: RegisterUserDto): Promise<UserToken>;
-}
-
-
-export class RegisterUser implements RegisterUserUseCase {
+export class LoginUser implements LoginUserUseCase {
 
     constructor(
         private readonly authRepository: AuthRepository,
         private readonly signToken: SignToken = JwtAdapter.generateToken
     ) {}
 
-    async execute(registerUserDto: RegisterUserDto): Promise<UserToken> {
-        const user = await this.authRepository.registerUser(registerUserDto);
+    async execute(loginDto: LoginDto): Promise<UserToken> {
+        const user = await this.authRepository.login(loginDto);
         const token = await this.signToken({ id: user.id });
 
         if (!token) throw CustomError.internalServerError('Error generating token');

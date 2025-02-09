@@ -1,3 +1,4 @@
+import { LoginDto } from "@src/auth/domain/dtos/login.dto";
 import { RegisterUserDto } from "@src/auth/domain/dtos/registerUser.dto";
 import { User } from "@src/auth/domain/entities/user.entity";
 import { IAuthRepository } from "@src/auth/domain/interfaces/auth.interface";
@@ -5,6 +6,7 @@ import { CustomError } from "@src/common/errors/custom.error";
 import { MysqlDatabase } from "@src/config/database/mysql";
 import { BcryptAdapter } from "@src/utils/bcrypt";
 import { Pool } from "mysql2/promise";
+import { UserMapper } from "@src/auth/infrastructure/mapper/user.mapper";
 
 export class MysqlAuthRepository implements IAuthRepository {
     private pool: Pool | null = null;
@@ -16,7 +18,7 @@ export class MysqlAuthRepository implements IAuthRepository {
         return this.pool;
     }
 
-    private valideExistingUser = async (email: string): Promise<boolean> => {
+    private validateExistingUser = async (email: string): Promise<User> => {
         try {
             const sql = 'SELECT * FROM users WHERE email = ?';
             const values = [email];
@@ -25,7 +27,7 @@ export class MysqlAuthRepository implements IAuthRepository {
                 { sql }, values
             );
 
-            return rows.length > 0;
+            return rows[0];
         } catch (error: any) {
             throw CustomError.internalServerError(error.message);
         }
@@ -59,16 +61,7 @@ export class MysqlAuthRepository implements IAuthRepository {
                 { sql }, values
             );
 
-            const { name, document, email, password, status, role } = rows[0];
-            return new User(
-                id, 
-                name, 
-                document, 
-                email, 
-                password, 
-                status, 
-                role
-            );
+           return rows[0];
         } catch (error: any) {
             throw CustomError.notFound(`User with id ${id} not found`);
         }
@@ -76,14 +69,35 @@ export class MysqlAuthRepository implements IAuthRepository {
 
     registerUser = async (registerUserDto: RegisterUserDto): Promise<User> => {
         try {
-            const userExist = await this.valideExistingUser(registerUserDto.email);
+            const userExist = await this.validateExistingUser(registerUserDto.email);
             
             if (userExist) {
                 throw CustomError.badRequest(`User with email ${registerUserDto.email} already exists`);
             }
     
             const userId = await this.createUser(registerUserDto);
-            return await this.getUserById(userId);
+            const user = this.getUserById(userId);
+            return UserMapper.userEntityFromObject(user);
+        } catch (error: any) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalServerError(error.message);
+        }
+    }
+
+    login = async (loginDto: LoginDto): Promise<User> => {
+        try {
+            const userExist = await this.validateExistingUser(loginDto.email);
+            if (!userExist) {
+                throw CustomError.badRequest('Wrong email or password');
+            }
+
+            const match = BcryptAdapter.compare(loginDto.password, userExist.password);
+            if (!match) {
+                throw CustomError.unauthorized('Wrong email or password');
+            }
+            return UserMapper.userEntityFromObject(userExist);
         } catch (error: any) {
             if (error instanceof CustomError) {
                 throw error;

@@ -1,8 +1,9 @@
-import { RegisterUser } from '@src/auth/application/use-case/register';
+import { LoginUser } from '@src/auth/application/use-cases/login';
+import { RegisterUser } from '@src/auth/application/use-cases/register';
+import { LoginDto } from '@src/auth/domain/dtos/login.dto';
 import { RegisterUserDto } from '@src/auth/domain/dtos/registerUser.dto';
 import { AuthRepository } from '@src/auth/domain/repositories/auth.repository';
 import { CustomError } from '@src/common/errors/custom.error';
-import { JwtAdapter } from '@src/utils/jwt';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 export class AuthController {
@@ -27,6 +28,11 @@ export class AuthController {
     }
 
     loginUser = (request: FastifyRequest, reply: FastifyReply) => {
-        reply.status(200).send({ message: "User logged in" });
+        const loginDto = request.body as LoginDto;
+        
+        new LoginUser(this.authRepository)
+            .execute(loginDto)
+            .then((response) => reply.status(200).send(response))
+            .catch((error) => this.handlerError(error, reply));
     }
 }
