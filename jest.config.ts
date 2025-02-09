@@ -1,9 +1,10 @@
 import { pathsToModuleNameMapper } from 'ts-jest';
 
 export default {
-    testEnvironment: "node",
+    preset: 'ts-jest',
+    testEnvironment: 'node',
     transform: {
-        "^.+.tsx?$": ["ts-jest", {}],
+        '^.+.tsx?$': ['ts-jest', {}],
     },
     roots: ['<rootDir>/tests'],
     modulePaths: ['.'],
