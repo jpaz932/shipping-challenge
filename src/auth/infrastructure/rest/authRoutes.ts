@@ -5,6 +5,8 @@ import { RegisterUserDto } from '@src/auth/domain/dtos/registerUser.dto';
 import { AuthRepositoryImpl } from '@src/auth/infrastructure/repositories/auth.repository';
 import { MysqlAuthRepository } from '@src/auth/infrastructure/datasource/mysql.repository';
 import { LoginDto } from '@src/auth/domain/dtos/login.dto';
+import { loginSchema } from '@src/auth/infrastructure/docs/schemas/login';
+import { registerSchema } from '../docs';
 
 const database = new MysqlAuthRepository();
 const authRepository = new AuthRepositoryImpl(database);
@@ -17,12 +19,18 @@ export const authRoutes = (
 ) => {
     fastify.post(
         '/login',
-        { preHandler: [validateDto(LoginDto)] },
+        {
+            preHandler: [validateDto(LoginDto)],
+            schema: loginSchema,
+        },
         controller.loginUser,
     );
     fastify.post(
         '/register',
-        { preHandler: [validateDto(RegisterUserDto)] },
+        {
+            preHandler: [validateDto(RegisterUserDto)],
+            schema: registerSchema,
+        },
         controller.registerUser,
     );
 
