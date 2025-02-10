@@ -3,6 +3,7 @@ import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 
 import { authRoutes } from '@src/auth/infrastructure/rest/authRoutes';
+import { shipmentRoutes } from '@src/shipments/infraestructure/rest/shipmentRoutes';
 
 export const registerRoutes = (fastify: FastifyInstance) => {
     fastify.register(swagger, {
@@ -28,4 +29,5 @@ export const registerRoutes = (fastify: FastifyInstance) => {
     });
 
     fastify.register(authRoutes, { prefix: '/api/auth' });
+    fastify.register(shipmentRoutes, { prefix: '/api/shipment' });
 };
