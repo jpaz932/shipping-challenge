@@ -6,11 +6,7 @@ import { validate } from 'class-validator';
 import { ClassConstructor } from 'class-transformer/types/interfaces';
 
 export const validateDto = (dto: ClassConstructor<any>) => {
-    return async (
-        request: FastifyRequest,
-        reply: FastifyReply,
-        next: (err?: Error) => void,
-    ) => {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
         const dtoInstance = plainToClass(dto, request.body);
         if (!dtoInstance) {
             return reply.status(400).send({
@@ -18,7 +14,6 @@ export const validateDto = (dto: ClassConstructor<any>) => {
             });
         }
         const errors = await validate(dtoInstance);
-        console.log(errors);
         if (errors.length > 0) {
             const errorResponse = {
                 message: 'Validation error',
@@ -32,7 +27,5 @@ export const validateDto = (dto: ClassConstructor<any>) => {
 
             return reply.status(400).send(errorResponse);
         }
-
-        next();
     };
 };

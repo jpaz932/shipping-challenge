@@ -1,10 +1,10 @@
 import { MysqlDatabase } from '@src/config/database/mysql';
 import { JwtAdapter } from '@src/utils/jwt';
-import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 declare module 'fastify' {
     interface FastifyRequest {
-        userId: number;
+        userId?: number;
     }
 }
 
@@ -12,7 +12,6 @@ export class AuthMiddleware {
     static validateJwtToken = async (
         request: FastifyRequest,
         reply: FastifyReply,
-        done: HookHandlerDoneFunction,
     ) => {
         const authorization = request.headers.authorization;
         if (!authorization)
@@ -39,7 +38,6 @@ export class AuthMiddleware {
                 return reply.code(401).send({ message: 'User is not active' });
 
             request.userId = payload.id;
-            done();
         } catch (error) {
             console.log(error);
             reply.code(500).send({ message: 'Internal server error' });
