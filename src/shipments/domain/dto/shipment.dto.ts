@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsValidAddress } from './IsValidAdress';
 
 export class ShipmentDto {
     @IsNumber()
@@ -7,6 +8,7 @@ export class ShipmentDto {
 
     @IsString()
     @IsNotEmpty()
+    @IsValidAddress()
     address: string;
 
     @IsString()
