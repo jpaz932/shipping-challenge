@@ -12,6 +12,11 @@ export const validateDto = (dto: ClassConstructor<any>) => {
         next: (err?: Error) => void,
     ) => {
         const dtoInstance = plainToClass(dto, request.body);
+        if (!dtoInstance) {
+            return reply.status(400).send({
+                message: 'Body is required',
+            });
+        }
         const errors = await validate(dtoInstance);
         console.log(errors);
         if (errors.length > 0) {

@@ -2,6 +2,12 @@ import { MysqlDatabase } from '@src/config/database/mysql';
 import { JwtAdapter } from '@src/utils/jwt';
 import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from 'fastify';
 
+declare module 'fastify' {
+    interface FastifyRequest {
+        userId: number;
+    }
+}
+
 export class AuthMiddleware {
     static validateJwtToken = async (
         request: FastifyRequest,
@@ -32,8 +38,7 @@ export class AuthMiddleware {
             if (!user[0].is_active)
                 return reply.code(401).send({ message: 'User is not active' });
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            (request.body as any).token = payload;
+            request.userId = payload.id;
             done();
         } catch (error) {
             console.log(error);

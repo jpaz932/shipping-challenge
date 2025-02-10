@@ -6,11 +6,10 @@ export const registerSchema = {
         type: 'object',
         properties: {
             name: { type: 'string' },
-            document: { type: 'string' },
+            document: { type: 'number' },
             email: { type: 'string' },
             password: { type: 'string' },
         },
-        required: ['name', 'document', 'email', 'password'],
     },
     responses: {
         201: {

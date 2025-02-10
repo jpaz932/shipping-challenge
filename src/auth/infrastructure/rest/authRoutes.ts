@@ -6,7 +6,7 @@ import { AuthRepositoryImpl } from '@src/auth/infrastructure/repositories/auth.r
 import { MysqlAuthRepository } from '@src/auth/infrastructure/datasource/mysql.repository';
 import { LoginDto } from '@src/auth/domain/dtos/login.dto';
 import { loginSchema } from '@src/auth/infrastructure/docs/schemas/login';
-import { registerSchema } from '../docs';
+import { registerSchema } from '@src/auth/infrastructure/docs/schemas/register';
 
 const database = new MysqlAuthRepository();
 const authRepository = new AuthRepositoryImpl(database);
