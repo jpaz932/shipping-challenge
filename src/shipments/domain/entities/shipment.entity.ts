@@ -12,5 +12,6 @@ export class Shipment {
         public destination_city: string,
         public created_at: Date,
         public updated_at: Date,
+        public tracking_code: string,
     ) {}
 }

@@ -29,6 +29,7 @@ export const sendPackageSchema = {
                 origin_city: { type: 'string' },
                 destination_city: { type: 'string' },
                 status: { type: 'string' },
+                tracking_code: { type: 'string' },
                 created_at: { type: 'string' },
                 updated_at: { type: 'string' },
             },

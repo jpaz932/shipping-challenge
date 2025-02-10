@@ -6,6 +6,7 @@ import { ShipmentRepositoryImpl } from '@src/shipments/infraestructure/repositor
 import { MysqlShipmentRepository } from '@src/shipments/infraestructure/datasource/mysql.repository';
 import { sendPackageSchema } from '@src/shipments/infraestructure/docs/schemas/sendPackage';
 import { AuthMiddleware } from '@src/common/middlewares/authMiddleware';
+import { getAllShipmentsSchema } from '../docs/schemas/getAllShipmentsSchema';
 
 const database = new MysqlShipmentRepository();
 const shipmentRepository = new ShipmentRepositoryImpl(database);
@@ -24,6 +25,15 @@ export const shipmentRoutes = (
             schema: sendPackageSchema,
         },
         controller.sendPackage,
+    );
+
+    fastify.get(
+        '/all',
+        {
+            onRequest: [AuthMiddleware.validateJwtToken],
+            schema: getAllShipmentsSchema,
+        },
+        controller.getAllShipments,
     );
 
     done();

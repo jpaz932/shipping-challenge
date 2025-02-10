@@ -5,6 +5,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 declare module 'fastify' {
     interface FastifyRequest {
         userId?: number;
+        role?: string;
     }
 }
 
@@ -30,13 +31,14 @@ export class AuthMiddleware {
                 'SELECT * FROM users WHERE id = ?',
                 [payload.id],
             );
-            const user = rows as { is_active: number }[];
+            const user = rows as { is_active: number; role: string }[];
             if (!user.length)
                 return reply.code(401).send({ message: 'Invalid token' });
 
             if (!user[0].is_active)
                 return reply.code(401).send({ message: 'User is not active' });
 
+            request.role = user[0].role;
             request.userId = payload.id;
         } catch (error) {
             console.log(error);

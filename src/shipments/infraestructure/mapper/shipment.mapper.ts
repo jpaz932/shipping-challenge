@@ -16,6 +16,7 @@ export class ShipmentMapper {
             destination_city,
             created_at,
             updated_at,
+            tracking_code,
         } = object;
 
         if (!id) throw CustomError.badRequest('Missing id');
@@ -30,6 +31,8 @@ export class ShipmentMapper {
             throw CustomError.badRequest('Missing destination_city');
         if (!created_at) throw CustomError.badRequest('Missing created_at');
         if (!updated_at) throw CustomError.badRequest('Missing updated_at');
+        if (!tracking_code)
+            throw CustomError.badRequest('Missing tracking_code');
 
         return new Shipment(
             id,
@@ -44,6 +47,7 @@ export class ShipmentMapper {
             destination_city,
             created_at,
             updated_at,
+            tracking_code,
         );
     }
 }

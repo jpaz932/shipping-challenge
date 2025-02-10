@@ -15,11 +15,16 @@ export class ShipmentRepository {
             shipmentDto.weight,
             shipmentDto.origin_city,
             shipmentDto.destination_city,
-            'Pendiente',
+            'En Espera',
             new Date(),
             new Date(),
+            'trakinCode',
         );
         this.shipments.push(shipment);
         return Promise.resolve(shipment);
+    }
+
+    async getAllShipments(): Promise<Shipment[]> {
+        return Promise.resolve(this.shipments);
     }
 }
