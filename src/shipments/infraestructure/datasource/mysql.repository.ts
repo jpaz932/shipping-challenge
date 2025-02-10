@@ -7,6 +7,8 @@ import { Shipment } from '@src/shipments/domain/entities/shipment.entity';
 import { CustomError } from '@src/common/errors/custom.error';
 import { ShipmentMapper } from '@src/shipments/infraestructure/mapper/shipment.mapper';
 import { generateCustomRandomString } from '@src/utils/utils';
+import { Carrier } from '@src/shipments/domain/entities/carrier.entity';
+import { CarrierMapper } from '@src/shipments/infraestructure/mapper/carrier.mapper';
 
 export class MysqlShipmentRepository implements ShipmentRepository {
     private pool: Pool | null = null;
@@ -91,6 +93,19 @@ export class MysqlShipmentRepository implements ShipmentRepository {
 
             return rows.map((row) =>
                 ShipmentMapper.shipmentEntityFromObject(row),
+            );
+        } catch (error) {
+            throw CustomError.internalServerError((error as Error).message);
+        }
+    };
+
+    getAllCarriers = async (): Promise<Carrier[]> => {
+        try {
+            const sql = 'SELECT * FROM carriers';
+            const [rows] = await this.getPool().execute<RowDataPacket[]>(sql);
+
+            return rows.map((row) =>
+                CarrierMapper.carrierEntityFromObject(row),
             );
         } catch (error) {
             throw CustomError.internalServerError((error as Error).message);

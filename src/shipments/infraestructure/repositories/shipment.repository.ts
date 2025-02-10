@@ -16,4 +16,8 @@ export class ShipmentRepositoryImpl implements IShipmentRepository {
     getAllShipments(request: FastifyRequest): Promise<Shipment[]> {
         return this.shipmentDatasourceRepository.getAllShipments(request);
     }
+
+    getAllCarriers() {
+        return this.shipmentDatasourceRepository.getAllCarriers();
+    }
 }

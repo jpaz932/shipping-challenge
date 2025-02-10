@@ -6,7 +6,7 @@ describe('SendPackage use case', () => {
         const repository = new ShipmentRepository();
         const registerUseCase = new SendPackage(repository);
 
-        const user = await registerUseCase.execute({
+        const shipment = await registerUseCase.execute({
             phone: 123456789,
             address: 'Calle 123',
             dimensions: '10x10x10',
@@ -17,6 +17,8 @@ describe('SendPackage use case', () => {
             userId: 1,
         });
 
-        expect(user).toHaveProperty('token');
+        expect(shipment).toHaveProperty('tracking_code');
+        expect(shipment).toHaveProperty('weight');
+        expect(shipment).toHaveProperty('destination_city');
     });
 });

@@ -4,9 +4,13 @@ import { ShipmentDto } from '@src/shipments/domain/dto/shipment.dto';
 import { ShipmentController } from './shipmentController';
 import { ShipmentRepositoryImpl } from '@src/shipments/infraestructure/repositories/shipment.repository';
 import { MysqlShipmentRepository } from '@src/shipments/infraestructure/datasource/mysql.repository';
-import { sendPackageSchema } from '@src/shipments/infraestructure/docs/schemas/sendPackage';
+
 import { AuthMiddleware } from '@src/common/middlewares/authMiddleware';
-import { getAllShipmentsSchema } from '../docs/schemas/getAllShipmentsSchema';
+import {
+    getAllCarriersSchema,
+    getAllShipmentsSchema,
+    sendPackageSchema,
+} from '@src/shipments/infraestructure/docs';
 
 const database = new MysqlShipmentRepository();
 const shipmentRepository = new ShipmentRepositoryImpl(database);
@@ -20,8 +24,8 @@ export const shipmentRoutes = (
     fastify.post(
         '/send-package',
         {
-            preHandler: [validateDto(ShipmentDto)],
-            onRequest: [AuthMiddleware.validateJwtToken],
+            preHandler: [AuthMiddleware.validateJwtToken],
+            onRequest: [validateDto(ShipmentDto)],
             schema: sendPackageSchema,
         },
         controller.sendPackage,
@@ -30,10 +34,19 @@ export const shipmentRoutes = (
     fastify.get(
         '/all',
         {
-            onRequest: [AuthMiddleware.validateJwtToken],
+            preHandler: [AuthMiddleware.validateJwtToken],
             schema: getAllShipmentsSchema,
         },
         controller.getAllShipments,
+    );
+
+    fastify.get(
+        '/carriers/all',
+        {
+            preHandler: [AuthMiddleware.validateJwtToken],
+            schema: getAllCarriersSchema,
+        },
+        controller.getAllCarriers,
     );
 
     done();
