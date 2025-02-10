@@ -1,12 +1,18 @@
 import { MysqlDatabase } from '@src/config/database/mysql';
 import { JwtAdapter } from '@src/utils/jwt';
-import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
+
+declare module 'fastify' {
+    interface FastifyRequest {
+        userId?: number;
+        role?: string;
+    }
+}
 
 export class AuthMiddleware {
     static validateJwtToken = async (
         request: FastifyRequest,
         reply: FastifyReply,
-        done: HookHandlerDoneFunction,
     ) => {
         const authorization = request.headers.authorization;
         if (!authorization)
@@ -25,16 +31,15 @@ export class AuthMiddleware {
                 'SELECT * FROM users WHERE id = ?',
                 [payload.id],
             );
-            const user = rows as { is_active: number }[];
+            const user = rows as { is_active: number; role: string }[];
             if (!user.length)
                 return reply.code(401).send({ message: 'Invalid token' });
 
             if (!user[0].is_active)
                 return reply.code(401).send({ message: 'User is not active' });
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            (request.body as any).token = payload;
-            done();
+            request.role = user[0].role;
+            request.userId = payload.id;
         } catch (error) {
             console.log(error);
             reply.code(500).send({ message: 'Internal server error' });
