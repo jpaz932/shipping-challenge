@@ -45,4 +45,21 @@ export class AuthMiddleware {
             reply.code(500).send({ message: 'Internal server error' });
         }
     };
+
+    static validateAdmin = async (
+        request: FastifyRequest,
+        reply: FastifyReply,
+    ) => {
+        try {
+            if (request.role !== 'Admin') {
+                return reply.code(403).send({
+                    message:
+                        'You do not have permissions to perform this action',
+                });
+            }
+        } catch (error) {
+            console.log(error);
+            reply.code(500).send({ message: 'Internal server error' });
+        }
+    };
 }

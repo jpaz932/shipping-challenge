@@ -1,8 +1,8 @@
 import { ShipmentRepository } from 'tests/shipments/infrastructure/__mocks__/ShipmentRepository';
-import { GetAllShipments } from '@src/shipments/application/use-cases/getAll';
+import { GetAllShipments } from '@src/shipments/application/use-cases/getAllShipments';
 import { FastifyRequest } from 'fastify';
 
-describe('GetAll use case', () => {
+describe('GetAll shipments use case', () => {
     it('should return all shipments', async () => {
         const repository = new ShipmentRepository();
         const getAllUseCase = new GetAllShipments(repository);
@@ -10,6 +10,8 @@ describe('GetAll use case', () => {
         const request = {} as FastifyRequest;
         const shipments = await getAllUseCase.execute(request);
 
-        expect(shipments).toHaveLength(0);
+        expect(shipments).toHaveLength(1);
+        expect(shipments[0]).toHaveProperty('id');
+        expect(shipments[0]).toHaveProperty('tracking_code');
     });
 });

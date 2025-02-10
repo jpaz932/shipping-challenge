@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { CustomError } from '@src/common/errors/custom.error';
 import { Shipment } from '@src/shipments/domain/entities/shipment.entity';
 
