@@ -4,6 +4,7 @@ import { ShipmentRepository } from '@src/shipments/domain/repositories/shipment.
 import { handlerError } from '@src/utils/handlerError';
 import { SendPackage } from '@src/shipments/application/use-cases/sendPackage';
 import { GetAllShipments } from '@src/shipments/application/use-cases/getAllShipments';
+import { CustomError } from '@src/common/errors/custom.error';
 
 export class ShipmentController {
     constructor(private readonly shipmentRepository: ShipmentRepository) {}
@@ -27,6 +28,25 @@ export class ShipmentController {
     getAllCarriers = (request: FastifyRequest, reply: FastifyReply) => {
         this.shipmentRepository
             .getAllCarriers()
+            .then((response) => reply.status(200).send(response))
+            .catch((error) => handlerError(error, reply));
+    };
+
+    assignShipmentToCarrier = (
+        request: FastifyRequest,
+        reply: FastifyReply,
+    ) => {
+        const { shipmentId } = request.body as { shipmentId: number };
+
+        if (!shipmentId) {
+            return handlerError(
+                CustomError.badRequest('ShipmentId is required'),
+                reply,
+            );
+        }
+
+        this.shipmentRepository
+            .assignShipmentToCarrier(shipmentId)
             .then((response) => reply.status(200).send(response))
             .catch((error) => handlerError(error, reply));
     };

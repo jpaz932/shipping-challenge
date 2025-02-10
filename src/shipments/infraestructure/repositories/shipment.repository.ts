@@ -3,6 +3,7 @@ import { ShipmentDto } from '@src/shipments/domain/dto/shipment.dto';
 import { Shipment } from '@src/shipments/domain/entities/shipment.entity';
 import { IShipmentRepository } from '@src/shipments/domain/interfaces/shipment.interface';
 import { ShipmentRepository } from '@src/shipments/domain/repositories/shipment.repository';
+import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarrier.entity';
 
 export class ShipmentRepositoryImpl implements IShipmentRepository {
     constructor(
@@ -19,5 +20,11 @@ export class ShipmentRepositoryImpl implements IShipmentRepository {
 
     getAllCarriers() {
         return this.shipmentDatasourceRepository.getAllCarriers();
+    }
+
+    assignShipmentToCarrier(shipmentId: number): Promise<ShipmentToCarrier> {
+        return this.shipmentDatasourceRepository.assignShipmentToCarrier(
+            shipmentId,
+        );
     }
 }

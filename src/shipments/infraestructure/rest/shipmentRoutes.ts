@@ -10,6 +10,7 @@ import {
     getAllCarriersSchema,
     getAllShipmentsSchema,
     sendPackageSchema,
+    assignShipmentToCarrierSchema,
 } from '@src/shipments/infraestructure/docs';
 
 const database = new MysqlShipmentRepository();
@@ -24,8 +25,8 @@ export const shipmentRoutes = (
     fastify.post(
         '/send-package',
         {
-            preHandler: [AuthMiddleware.validateJwtToken],
-            onRequest: [validateDto(ShipmentDto)],
+            onRequest: [AuthMiddleware.validateJwtToken],
+            preHandler: [validateDto(ShipmentDto)],
             schema: sendPackageSchema,
         },
         controller.sendPackage,
@@ -34,7 +35,7 @@ export const shipmentRoutes = (
     fastify.get(
         '/all',
         {
-            preHandler: [AuthMiddleware.validateJwtToken],
+            onRequest: [AuthMiddleware.validateJwtToken],
             schema: getAllShipmentsSchema,
         },
         controller.getAllShipments,
@@ -43,10 +44,25 @@ export const shipmentRoutes = (
     fastify.get(
         '/carriers/all',
         {
-            preHandler: [AuthMiddleware.validateJwtToken],
+            onRequest: [
+                AuthMiddleware.validateJwtToken,
+                AuthMiddleware.validateAdmin,
+            ],
             schema: getAllCarriersSchema,
         },
         controller.getAllCarriers,
+    );
+
+    fastify.post(
+        '/assign-shipment-to-carrier',
+        {
+            onRequest: [
+                AuthMiddleware.validateJwtToken,
+                AuthMiddleware.validateAdmin,
+            ],
+            schema: assignShipmentToCarrierSchema,
+        },
+        controller.assignShipmentToCarrier,
     );
 
     done();

@@ -10,6 +10,8 @@ describe('GetAll shipments use case', () => {
         const request = {} as FastifyRequest;
         const shipments = await getAllUseCase.execute(request);
 
-        expect(shipments).toHaveLength(0);
+        expect(shipments).toHaveLength(1);
+        expect(shipments[0]).toHaveProperty('id');
+        expect(shipments[0]).toHaveProperty('tracking_code');
     });
 });
