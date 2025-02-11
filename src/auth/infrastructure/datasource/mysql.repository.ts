@@ -1,3 +1,4 @@
+import { FastifyInstance } from 'fastify';
 import { LoginDto } from '@src/auth/domain/dtos/login.dto';
 import { RegisterUserDto } from '@src/auth/domain/dtos/registerUser.dto';
 import { User } from '@src/auth/domain/entities/user.entity';
@@ -9,6 +10,7 @@ import { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { UserMapper } from '@src/auth/infrastructure/mapper/user.mapper';
 
 export class MysqlAuthRepository implements IAuthRepository {
+    constructor(private readonly fastify: FastifyInstance) {}
     private pool: Pool | null = null;
 
     private getPool() {
@@ -18,12 +20,41 @@ export class MysqlAuthRepository implements IAuthRepository {
         return this.pool;
     }
 
+    private async getCachedUser(key: string): Promise<User | null> {
+        try {
+            const cachedUser = await this.fastify.redis.get(key);
+            return cachedUser ? (JSON.parse(cachedUser) as User) : null;
+        } catch (error) {
+            console.error('Redis cache error:', error);
+            return null;
+        }
+    }
+
+    private async setCachedUser(key: string, user: User): Promise<void> {
+        try {
+            await this.fastify.redis.set(key, JSON.stringify(user), 'EX', 3600);
+        } catch (error) {
+            console.error('Redis cache error:', error);
+        }
+    }
+
     private validateExistingUser = async (email: string): Promise<User> => {
         try {
+            const cacheKey = `user:email:${email}`;
+            const cachedUser = await this.getCachedUser(cacheKey);
+
+            if (cachedUser) {
+                return cachedUser;
+            }
             const sql = 'SELECT * FROM users WHERE email = ?';
             const values = [email];
 
             const [rows] = await this.getPool().execute<any[]>({ sql }, values);
+
+            if (rows[0]) {
+                await this.setCachedUser(cacheKey, rows[0] as User);
+                return rows[0] as User;
+            }
 
             return rows[0] as User;
         } catch (error: any) {

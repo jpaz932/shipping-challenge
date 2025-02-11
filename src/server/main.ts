@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { envs } from '@src/config/envs';
 import { registerRoutes } from './routes/routes';
 import { MysqlDatabase } from '@src/config/database/mysql';
+import FastifyRedis from '@fastify/redis';
 
 const fastify = Fastify();
 
@@ -14,6 +15,14 @@ const start = async () => {
             user: envs.mysqlUser,
             password: envs.mysqlPassword,
             database: envs.mysqlDbName,
+        });
+
+        fastify.register(FastifyRedis, {
+            host: envs.redisHost,
+            port: envs.redisPort,
+            closeClient: true,
+            maxRetriesPerRequest: 3,
+            connectTimeout: 5000,
         });
 
         await fastify.listen({
