@@ -4,6 +4,7 @@ export const getAllCarriersSchema = {
     summary: 'Obtiene todos los transportistas',
     response: {
         200: {
+            description: 'Transportistas obtenidos',
             type: 'array',
             items: {
                 type: 'object',

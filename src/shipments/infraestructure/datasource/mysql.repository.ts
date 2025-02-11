@@ -10,6 +10,11 @@ import { generateCustomRandomString } from '@src/utils/utils';
 import { Carrier } from '@src/shipments/domain/entities/carrier.entity';
 import { CarrierMapper } from '@src/shipments/infraestructure/mapper/carrier.mapper';
 import { AssigmentShipmentToCarrierMapper } from '../mapper/assigmentShipmentToCarrier';
+import { ShipmentsHistoryMapper } from '@src/shipments/infraestructure/mapper/shipmentHistory.mapper';
+import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
+import { RouteMapper } from '@src/shipments/infraestructure/mapper/routesMapper';
+import { Routes } from '@src/shipments/domain/entities/routes.entity';
+import { StatusRouteDto } from '@src/shipments/domain/dto/routeDto';
 
 export class MysqlShipmentRepository implements ShipmentRepository {
     private pool: Pool | null = null;
@@ -69,6 +74,17 @@ export class MysqlShipmentRepository implements ShipmentRepository {
         }
     };
 
+    getAllRoutes = async (): Promise<Routes[]> => {
+        try {
+            const sql = 'SELECT * FROM routes where status = TRUE';
+            const [rows] = await this.getPool().execute<RowDataPacket[]>(sql);
+
+            return rows.map((row) => RouteMapper.routesEntityFromObject(row));
+        } catch (error) {
+            throw CustomError.internalServerError((error as Error).message);
+        }
+    };
+
     assignShipmentToCarrier = async (id: number) => {
         try {
             const findShipment = await this.getShipmentById(id);
@@ -115,6 +131,124 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                     routeId,
                 },
             );
+        } catch (error) {
+            throw CustomError.internalServerError((error as Error).message);
+        }
+    };
+
+    getShipmentByTrackingCode = async (
+        trackingCode: string,
+    ): Promise<ShipmentHistory> => {
+        try {
+            const sql = `SELECT s.tracking_code, s.origin_city, s.destination_city, sh.status, sh.created_at 
+                FROM shipments s
+                INNER JOIN shipment_history sh ON s.id = sh.shipment_id
+                WHERE s.tracking_code = ?
+            `;
+            const values = [trackingCode];
+            const [rows] = await this.getPool().execute<RowDataPacket[]>(
+                { sql },
+                values,
+            );
+
+            return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject(rows);
+        } catch {
+            throw CustomError.notFound(
+                `Shipment with tracking code ${trackingCode} not found`,
+            );
+        }
+    };
+
+    async changeRouteStatus(
+        statusRouteDto: StatusRouteDto,
+    ): Promise<{ message: string; status: string }> {
+        try {
+            const { routeId, status } = statusRouteDto;
+            const shipments = await this.getShipmentsIdsByroute(routeId);
+
+            for (const shipment of shipments) {
+                const insertSql =
+                    'INSERT INTO shipment_history (shipment_id, carrier_id, status) VALUES (?, ?, ?)';
+                const insertValues = [
+                    shipment.shipment_id,
+                    shipment.assigned_carrier_id,
+                    status,
+                ];
+
+                await Promise.all([
+                    this.getPool().execute<ResultSetHeader>(
+                        insertSql,
+                        insertValues,
+                    ),
+                    this.updateShipmentStatus(
+                        Number(shipment.shipment_id),
+                        status,
+                    ),
+                ]);
+
+                if (status === 'Entregado') {
+                    const updateCarrierUbication = `
+                        UPDATE carrier_locations
+                        SET current_location = (
+                            SELECT destination
+                            FROM routes
+                            WHERE id = ?
+                        ), available = TRUE
+                        WHERE carrier_id = ?;
+                    `;
+
+                    await this.getPool().execute<ResultSetHeader>(
+                        updateCarrierUbication,
+                        [routeId, shipment.assigned_carrier_id],
+                    );
+                }
+
+                if (status === 'En tránsito') {
+                    const updateCarrierAvailable = `
+                        UPDATE carrier_locations
+                        SET available = FALSE
+                        WHERE carrier_id = ?;
+                    `;
+                    await this.getPool().execute<ResultSetHeader>(
+                        updateCarrierAvailable,
+                        [shipment.assigned_carrier_id],
+                    );
+                }
+            }
+
+            if (status === 'Entregado') {
+                const updateStatusRoute =
+                    'UPDATE routes SET status = FALSE WHERE id = ?';
+                await this.getPool().execute<ResultSetHeader>(
+                    updateStatusRoute,
+                    [routeId],
+                );
+            }
+
+            return { message: 'Status updated successfully', status };
+        } catch (error) {
+            throw CustomError.internalServerError((error as Error).message);
+        }
+    }
+
+    private getShipmentsIdsByroute = async (routeId: number) => {
+        try {
+            const sql = `
+                SELECT shipment_id, assigned_carrier_id FROM shipment_routes
+                WHERE route_id = ?
+            `;
+            const [rows] = await this.getPool().execute<RowDataPacket[]>(
+                { sql },
+                [routeId],
+            );
+
+            if (!rows.length) {
+                throw CustomError.badRequest(
+                    'The route has no shipments assigned',
+                );
+            }
+
+            return rows;
         } catch (error) {
             throw CustomError.internalServerError((error as Error).message);
         }
@@ -188,6 +322,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 SELECT r.* FROM routes r
                 LEFT JOIN carriers c ON c.id = r.carrier_id
                 WHERE r.origin LIKE ? AND r.destination LIKE ?
+                AND r.status = TRUE
                 AND (
                     r.carrier_id IS NULL
                     OR c.vehicle_capacity >= ? + (
