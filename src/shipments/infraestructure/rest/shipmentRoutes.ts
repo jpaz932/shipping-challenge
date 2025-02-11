@@ -17,15 +17,14 @@ import {
 } from '@src/shipments/infraestructure/docs';
 import { StatusRouteDto } from '@src/shipments/domain/dto/routeDto';
 
-const database = new MysqlShipmentRepository();
-const shipmentRepository = new ShipmentRepositoryImpl(database);
-const controller = new ShipmentController(shipmentRepository);
-
 export const shipmentRoutes = (
     fastify: FastifyInstance,
     opts: any,
     done: () => void,
 ) => {
+    const database = new MysqlShipmentRepository(fastify);
+    const shipmentRepository = new ShipmentRepositoryImpl(database);
+    const controller = new ShipmentController(shipmentRepository);
     fastify.post(
         '/send-package',
         {

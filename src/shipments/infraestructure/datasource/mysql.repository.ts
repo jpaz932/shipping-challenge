@@ -1,4 +1,4 @@
-import { FastifyRequest } from 'fastify';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 import { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { MysqlDatabase } from '@src/config/database/mysql';
 import { ShipmentRepository } from '@src/shipments/domain/repositories/shipment.repository';
@@ -17,6 +17,7 @@ import { Routes } from '@src/shipments/domain/entities/routes.entity';
 import { StatusRouteDto } from '@src/shipments/domain/dto/routeDto';
 
 export class MysqlShipmentRepository implements ShipmentRepository {
+    constructor(private readonly fastify: FastifyInstance) {}
     private pool: Pool | null = null;
 
     private getPool() {
@@ -24,6 +25,37 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             this.pool = MysqlDatabase.getConnection();
         }
         return this.pool;
+    }
+
+    private async getCached<T>(key: string): Promise<T | null> {
+        try {
+            const cached = await this.fastify.redis.get(key);
+            return cached ? (JSON.parse(cached) as T) : null;
+        } catch (error) {
+            console.error('Redis cache error:', error);
+            return null;
+        }
+    }
+
+    private async setCached(key: string, object: any): Promise<void> {
+        try {
+            await this.fastify.redis.set(
+                key,
+                JSON.stringify(object),
+                'EX',
+                3600,
+            );
+        } catch (error) {
+            console.error('Redis cache error:', error);
+        }
+    }
+
+    private async invalidateCache(key: string): Promise<void> {
+        try {
+            await this.fastify.redis.del(key);
+        } catch (error) {
+            console.error('Redis cache invalidation error:', error);
+        }
     }
 
     sendPackage = async (shipmentDto: ShipmentDto): Promise<Shipment> => {
@@ -63,8 +95,24 @@ export class MysqlShipmentRepository implements ShipmentRepository {
 
     getAllCarriers = async (): Promise<Carrier[]> => {
         try {
+            const cacheKey = `carriers:all:`;
+            const cached = await this.getCached(cacheKey);
+
+            if (cached) {
+                return (cached as RowDataPacket[]).map((row) =>
+                    CarrierMapper.carrierEntityFromObject(row),
+                );
+            }
+
             const sql = 'SELECT * FROM carriers';
             const [rows] = await this.getPool().execute<RowDataPacket[]>(sql);
+
+            if (rows[0]) {
+                await this.setCached(cacheKey, rows);
+                return rows.map((row) =>
+                    CarrierMapper.carrierEntityFromObject(row),
+                );
+            }
 
             return rows.map((row) =>
                 CarrierMapper.carrierEntityFromObject(row),
@@ -76,8 +124,24 @@ export class MysqlShipmentRepository implements ShipmentRepository {
 
     getAllRoutes = async (): Promise<Routes[]> => {
         try {
+            const cacheKey = `routes:all`;
+            const cached = await this.getCached(cacheKey);
+
+            if (cached) {
+                return (cached as RowDataPacket[]).map((row) =>
+                    RouteMapper.routesEntityFromObject(row),
+                );
+            }
+
             const sql = 'SELECT * FROM routes where status = TRUE';
             const [rows] = await this.getPool().execute<RowDataPacket[]>(sql);
+
+            if (rows[0]) {
+                await this.setCached(cacheKey, rows);
+                return rows.map((row) =>
+                    RouteMapper.routesEntityFromObject(row),
+                );
+            }
 
             return rows.map((row) => RouteMapper.routesEntityFromObject(row));
         } catch (error) {
@@ -140,6 +204,15 @@ export class MysqlShipmentRepository implements ShipmentRepository {
         trackingCode: string,
     ): Promise<ShipmentHistory> => {
         try {
+            const cacheKey = `shipment:trackingCode${trackingCode}`;
+            const cached = await this.getCached(cacheKey);
+
+            if (cached) {
+                return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject([
+                    cached,
+                ]);
+            }
+
             const sql = `SELECT s.tracking_code, s.origin_city, s.destination_city, sh.status, sh.created_at 
                 FROM shipments s
                 INNER JOIN shipment_history sh ON s.id = sh.shipment_id
@@ -150,6 +223,13 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 { sql },
                 values,
             );
+
+            if (rows[0]) {
+                await this.setCached(cacheKey, rows);
+                return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject(
+                    rows,
+                );
+            }
 
             return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject(rows);
         } catch {
@@ -197,10 +277,13 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                         WHERE carrier_id = ?;
                     `;
 
-                    await this.getPool().execute<ResultSetHeader>(
-                        updateCarrierUbication,
-                        [routeId, shipment.assigned_carrier_id],
-                    );
+                    await Promise.all([
+                        this.getPool().execute<ResultSetHeader>(
+                            updateCarrierUbication,
+                            [routeId, shipment.assigned_carrier_id],
+                        ),
+                        this.invalidateCache(`carriers:all`),
+                    ]);
                 }
 
                 if (status === 'En tránsito') {
@@ -219,10 +302,13 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             if (status === 'Entregado') {
                 const updateStatusRoute =
                     'UPDATE routes SET status = FALSE WHERE id = ?';
-                await this.getPool().execute<ResultSetHeader>(
-                    updateStatusRoute,
-                    [routeId],
-                );
+
+                await Promise.all([
+                    this.getPool().execute<ResultSetHeader>(updateStatusRoute, [
+                        routeId,
+                    ]),
+                    this.invalidateCache(`routes:all`),
+                ]);
             }
 
             return { message: 'Status updated successfully', status };
@@ -284,6 +370,13 @@ export class MysqlShipmentRepository implements ShipmentRepository {
 
     private getShipmentById = async (id: number) => {
         try {
+            const cacheKey = `shipment:${id}`;
+            const cached = await this.getCached(cacheKey);
+
+            if (cached) {
+                return cached;
+            }
+
             const sql = 'SELECT * FROM shipments WHERE id = ?';
             const values = [id];
 
@@ -291,6 +384,11 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 { sql },
                 values,
             );
+
+            if (rows[0]) {
+                await this.setCached(cacheKey, rows[0]);
+                return rows[0];
+            }
 
             return rows[0];
         } catch {
@@ -440,6 +538,16 @@ export class MysqlShipmentRepository implements ShipmentRepository {
         status: string,
     ) => {
         try {
+            const shipment = (await this.getShipmentById(
+                shipmentId,
+            )) as Shipment;
+            await Promise.all([
+                this.invalidateCache(
+                    `shipment:trackingCode:${shipment.tracking_code}`,
+                ),
+                this.invalidateCache(`shipment:${shipmentId}`),
+            ]);
+
             const sql = `
                 UPDATE shipments
                 SET status = ?
