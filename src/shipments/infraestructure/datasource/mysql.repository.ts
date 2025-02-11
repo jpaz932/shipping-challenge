@@ -225,7 +225,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             );
 
             if (rows[0]) {
-                await this.setCached(cacheKey, rows);
+                await this.setCached(cacheKey, rows[0]);
                 return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject(
                     rows,
                 );
@@ -284,18 +284,6 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                         ),
                         this.invalidateCache(`carriers:all`),
                     ]);
-                }
-
-                if (status === 'En tránsito') {
-                    const updateCarrierAvailable = `
-                        UPDATE carrier_locations
-                        SET available = FALSE
-                        WHERE carrier_id = ?;
-                    `;
-                    await this.getPool().execute<ResultSetHeader>(
-                        updateCarrierAvailable,
-                        [shipment.assigned_carrier_id],
-                    );
                 }
             }
 
@@ -385,6 +373,10 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 values,
             );
 
+            if (!rows[0]) {
+                throw CustomError.notFound(`Shipment with id ${id} not found`);
+            }
+
             if (rows[0]) {
                 await this.setCached(cacheKey, rows[0]);
                 return rows[0];
@@ -449,6 +441,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                         { sql },
                         values,
                     );
+                await this.invalidateCache(`routes:all`);
 
                 const findSql = 'SELECT * FROM routes WHERE id = ?';
                 const findValues = [newRoute.insertId];
@@ -543,7 +536,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             )) as Shipment;
             await Promise.all([
                 this.invalidateCache(
-                    `shipment:trackingCode:${shipment.tracking_code}`,
+                    `shipment:trackingCode${shipment.tracking_code}`,
                 ),
                 this.invalidateCache(`shipment:${shipmentId}`),
             ]);

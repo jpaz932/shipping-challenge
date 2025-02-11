@@ -1,4 +1,5 @@
 export const generateCustomRandomString = (code: string) => {
+    code = code.replace(/[^a-zA-Z0-9 ]/g, '');
     const chars = code
         .replace(' ', '')
         .concat(
