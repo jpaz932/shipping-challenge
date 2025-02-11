@@ -18,8 +18,8 @@ const start = async () => {
         });
 
         fastify.register(FastifyRedis, {
-            host: '127.0.0.1',
-            port: 6379,
+            host: envs.redisHost,
+            port: envs.redisPort,
             closeClient: true,
             maxRetriesPerRequest: 3,
             connectTimeout: 5000,
