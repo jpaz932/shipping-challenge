@@ -3,6 +3,7 @@ import { ShipmentDto } from '@src/shipments/domain/dto/shipment.dto';
 import { Carrier } from '@src/shipments/domain/entities/carrier.entity';
 import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarrier.entity';
 import { CustomError } from '@src/common/errors/custom.error';
+import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
 
 export class ShipmentRepository {
     private shipments: Shipment[] = [
@@ -83,6 +84,32 @@ export class ShipmentRepository {
                 shipmentCarrier.shipmentId,
                 Number(shipmentCarrier.carrierId),
                 Number(shipmentCarrier.routeId),
+            ),
+        );
+    }
+
+    async getShipmentByTrackingCode(
+        trackingCode: string,
+    ): Promise<ShipmentHistory> {
+        const shipment = this.shipments.find(
+            (shipment) => shipment.tracking_code === trackingCode,
+        );
+
+        if (!shipment) {
+            throw CustomError.notFound('Shipment not found');
+        }
+
+        return Promise.resolve(
+            new ShipmentHistory(
+                shipment.tracking_code,
+                shipment.origin_city,
+                shipment.destination_city,
+                [
+                    {
+                        status: shipment.status,
+                        created_at: shipment.created_at,
+                    },
+                ],
             ),
         );
     }

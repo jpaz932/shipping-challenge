@@ -10,6 +10,8 @@ import { generateCustomRandomString } from '@src/utils/utils';
 import { Carrier } from '@src/shipments/domain/entities/carrier.entity';
 import { CarrierMapper } from '@src/shipments/infraestructure/mapper/carrier.mapper';
 import { AssigmentShipmentToCarrierMapper } from '../mapper/assigmentShipmentToCarrier';
+import { ShipmentsHistoryMapper } from '@src/shipments/infraestructure/mapper/shipmentHistory.mapper';
+import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
 
 export class MysqlShipmentRepository implements ShipmentRepository {
     private pool: Pool | null = null;
@@ -117,6 +119,29 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             );
         } catch (error) {
             throw CustomError.internalServerError((error as Error).message);
+        }
+    };
+
+    getShipmentByTrackingCode = async (
+        trackingCode: string,
+    ): Promise<ShipmentHistory> => {
+        try {
+            const sql = `SELECT s.tracking_code, s.origin_city, s.destination_city, sh.status, sh.created_at 
+                FROM shipments s
+                INNER JOIN shipment_history sh ON s.id = sh.shipment_id
+                WHERE s.tracking_code = ?
+            `;
+            const values = [trackingCode];
+            const [rows] = await this.getPool().execute<RowDataPacket[]>(
+                { sql },
+                values,
+            );
+
+            return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject(rows);
+        } catch {
+            throw CustomError.notFound(
+                `Shipment with tracking code ${trackingCode} not found`,
+            );
         }
     };
 

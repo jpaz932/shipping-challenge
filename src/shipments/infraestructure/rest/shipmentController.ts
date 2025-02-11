@@ -50,4 +50,23 @@ export class ShipmentController {
             .then((response) => reply.status(200).send(response))
             .catch((error) => handlerError(error, reply));
     };
+
+    getShipmentByTrakingCode = (
+        request: FastifyRequest,
+        reply: FastifyReply,
+    ) => {
+        const { trackingCode } = request.params as { trackingCode: string };
+
+        if (!trackingCode) {
+            return handlerError(
+                CustomError.badRequest('trackingCode  is required'),
+                reply,
+            );
+        }
+
+        this.shipmentRepository
+            .getShipmentByTrackingCode(trackingCode)
+            .then((response) => reply.status(200).send(response))
+            .catch((error) => handlerError(error, reply));
+    };
 }

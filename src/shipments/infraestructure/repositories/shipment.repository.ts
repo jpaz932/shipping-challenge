@@ -4,6 +4,7 @@ import { Shipment } from '@src/shipments/domain/entities/shipment.entity';
 import { IShipmentRepository } from '@src/shipments/domain/interfaces/shipment.interface';
 import { ShipmentRepository } from '@src/shipments/domain/repositories/shipment.repository';
 import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarrier.entity';
+import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
 
 export class ShipmentRepositoryImpl implements IShipmentRepository {
     constructor(
@@ -25,6 +26,12 @@ export class ShipmentRepositoryImpl implements IShipmentRepository {
     assignShipmentToCarrier(shipmentId: number): Promise<ShipmentToCarrier> {
         return this.shipmentDatasourceRepository.assignShipmentToCarrier(
             shipmentId,
+        );
+    }
+
+    getShipmentByTrackingCode(trackingCode: string): Promise<ShipmentHistory> {
+        return this.shipmentDatasourceRepository.getShipmentByTrackingCode(
+            trackingCode,
         );
     }
 }

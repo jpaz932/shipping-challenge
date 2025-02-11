@@ -10,7 +10,7 @@ export const assignShipmentToCarrierSchema = {
     },
     response: {
         200: {
-            description: 'Envios obtenidos',
+            description: 'Envio asignado',
             type: 'object',
             properties: {
                 shipmentId: { type: 'number' },

@@ -3,6 +3,7 @@ import { Shipment } from '@src/shipments/domain/entities/shipment.entity';
 import { ShipmentDto } from '@src/shipments/domain/dto/shipment.dto';
 import { Carrier } from '@src/shipments/domain/entities/carrier.entity';
 import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarrier.entity';
+import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
 
 export abstract class ShipmentRepository {
     abstract sendPackage(shipmentDto: ShipmentDto): Promise<Shipment>;
@@ -11,4 +12,7 @@ export abstract class ShipmentRepository {
     abstract assignShipmentToCarrier(
         shipmentId: number,
     ): Promise<ShipmentToCarrier>;
+    abstract getShipmentByTrackingCode(
+        trackingCode: string,
+    ): Promise<ShipmentHistory>;
 }
