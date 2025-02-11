@@ -15,7 +15,7 @@ Este proyecto sigue la arquitectura hexagonal y está desarrollado con Node.js, 
 
 Clona el repositorio y ejecuta:
 ```bash
-yarn install # o npm install o pnpm install
+npm install
 ```
 
 ## Configuración
