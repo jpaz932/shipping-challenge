@@ -11,7 +11,11 @@ import {
     getAllShipmentsSchema,
     sendPackageSchema,
     assignShipmentToCarrierSchema,
+    getShipmentByTrackingCode,
+    getAllRoutesSchema,
+    changeStatusRouteSchema,
 } from '@src/shipments/infraestructure/docs';
+import { StatusRouteDto } from '@src/shipments/domain/dto/routeDto';
 
 const database = new MysqlShipmentRepository();
 const shipmentRepository = new ShipmentRepositoryImpl(database);
@@ -63,6 +67,40 @@ export const shipmentRoutes = (
             schema: assignShipmentToCarrierSchema,
         },
         controller.assignShipmentToCarrier,
+    );
+
+    fastify.get(
+        '/tracking-shipment/:trackingCode',
+        {
+            onRequest: [AuthMiddleware.validateJwtToken],
+            schema: getShipmentByTrackingCode,
+        },
+        controller.getShipmentByTrakingCode,
+    );
+
+    fastify.get(
+        '/routes/all',
+        {
+            onRequest: [
+                AuthMiddleware.validateJwtToken,
+                AuthMiddleware.validateAdmin,
+            ],
+            schema: getAllRoutesSchema,
+        },
+        controller.getAllRoutes,
+    );
+
+    fastify.post(
+        '/routes/status',
+        {
+            onRequest: [
+                AuthMiddleware.validateJwtToken,
+                AuthMiddleware.validateAdmin,
+            ],
+            preHandler: [validateDto(StatusRouteDto)],
+            schema: changeStatusRouteSchema,
+        },
+        controller.changeRouteStatus,
     );
 
     done();
