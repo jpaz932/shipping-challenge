@@ -1,0 +1,272 @@
+{
+	"info": {
+		"_postman_id": "66a15fda-8277-4a36-a691-e31632580ed6",
+		"name": "Shipping-challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6751435"
+	},
+	"item": [
+		{
+			"name": "AUTH - logIn",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"admin@example.com\",\r\n    \"password\": \"12345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/login",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AUTH - register user",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Juan Pablo\",\r\n    \"document\": 1053831073,\r\n    \"email\": \"juanpa.aristis@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/register",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SHIPMENT -  send package",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM5MjM5NjU2LCJleHAiOjE3MzkzMjYwNTZ9.VIn_ZRFJubu_SsdZvpmwEdC2aD9Mhaz_81aMwaBaeDM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"phone\": 3145930579,\r\n    \"address\": \"cra 7a #40-02\",\r\n    \"dimensions\": \"30x30cm\",\r\n    \"product_type\": \"caja\",\r\n    \"weight\": 10,\r\n    \"origin_city\": \"Manizales\",\r\n    \"destination_city\": \"Medellin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/shipment/send-package",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"shipment",
+						"send-package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SHIPMENT - get all Shipments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM5MjM5NjU2LCJleHAiOjE3MzkzMjYwNTZ9.VIn_ZRFJubu_SsdZvpmwEdC2aD9Mhaz_81aMwaBaeDM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/shipment/all",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"shipment",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SHIPMENT - get all carriers",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM5MjI0MjU5LCJleHAiOjE3MzkzMTA2NTl9.1bAkRKDmZ24tDx7TniXuFNx-31pnOMQRTjwLC6gr8kE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/shipment/carriers/all",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"shipment",
+						"carriers",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SHIPMENT - asign shipment to carrier",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM5MjI0MjU5LCJleHAiOjE3MzkzMTA2NTl9.1bAkRKDmZ24tDx7TniXuFNx-31pnOMQRTjwLC6gr8kE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"shipmentId\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/shipment/assign-shipment-to-carrier",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"shipment",
+						"assign-shipment-to-carrier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SHIPMENT - tracking code",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM5MjI0MjU5LCJleHAiOjE3MzkzMTA2NTl9.1bAkRKDmZ24tDx7TniXuFNx-31pnOMQRTjwLC6gr8kE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/shipment/tracking-shipment/P704r7Ozzkyu46Xlnn7w",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"shipment",
+						"tracking-shipment",
+						"P704r7Ozzkyu46Xlnn7w"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ROUTES - get all routes",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM5MjQyNjg5LCJleHAiOjE3MzkzMjkwODl9.E5pttgQ2PIE9_ecSOBVkXjgCLfFQIZFiuYV6PgP15No",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/shipment/routes/all",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"shipment",
+						"routes",
+						"all"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

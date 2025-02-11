@@ -8,15 +8,15 @@ import { LoginDto } from '@src/auth/domain/dtos/login.dto';
 import { loginSchema } from '@src/auth/infrastructure/docs/schemas/login';
 import { registerSchema } from '@src/auth/infrastructure/docs/schemas/register';
 
-const database = new MysqlAuthRepository();
-const authRepository = new AuthRepositoryImpl(database);
-const controller = new AuthController(authRepository);
-
 export const authRoutes = (
     fastify: FastifyInstance,
     opts: any,
     done: () => void,
 ) => {
+    const database = new MysqlAuthRepository(fastify);
+    const authRepository = new AuthRepositoryImpl(database);
+    const controller = new AuthController(authRepository);
+
     fastify.post(
         '/login',
         {

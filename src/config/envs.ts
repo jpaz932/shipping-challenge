@@ -9,6 +9,8 @@ interface EnvVars {
     MYSQL_PASS?: string;
     MYSQL_DB_NAME: string;
     MYSQL_PORT?: number;
+    REDIS_HOST: string;
+    REDIS_PORT: number;
 }
 
 const envSchema = joi
@@ -20,6 +22,8 @@ const envSchema = joi
         MYSQL_PASS: joi.string().optional().allow(''),
         MYSQL_DB_NAME: joi.string().required(),
         MYSQL_PORT: joi.number().optional(),
+        REDIS_HOST: joi.string().required(),
+        REDIS_PORT: joi.number().required(),
     })
     .unknown(true);
 
@@ -40,6 +44,8 @@ const {
     MYSQL_PASS: mysqlPassword = '',
     MYSQL_DB_NAME: mysqlDbName,
     MYSQL_PORT: mysqlPort = 3306,
+    REDIS_HOST: redisHost,
+    REDIS_PORT: redisPort,
 } = envVars;
 
 export const envs = {
@@ -50,4 +56,6 @@ export const envs = {
     mysqlPassword,
     mysqlDbName,
     mysqlPort,
+    redisHost,
+    redisPort,
 };
