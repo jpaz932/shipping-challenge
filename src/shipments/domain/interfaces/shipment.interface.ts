@@ -4,6 +4,7 @@ import { ShipmentDto } from '@src/shipments/domain/dto/shipment.dto';
 import { Carrier } from '@src/shipments/domain/entities/carrier.entity';
 import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarrier.entity';
 import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
+import { Routes } from '@src/shipments/domain/entities/routes.entity';
 
 export interface IShipmentRepository {
     sendPackage(shipmentDto: ShipmentDto): Promise<Shipment>;
@@ -11,4 +12,5 @@ export interface IShipmentRepository {
     getAllCarriers(): Promise<Carrier[]>;
     assignShipmentToCarrier(shipmentId: number): Promise<ShipmentToCarrier>;
     getShipmentByTrackingCode(trackingCode: string): Promise<ShipmentHistory>;
+    getAllRoutes(): Promise<Routes[]>;
 }

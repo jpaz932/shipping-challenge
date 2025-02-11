@@ -69,4 +69,11 @@ export class ShipmentController {
             .then((response) => reply.status(200).send(response))
             .catch((error) => handlerError(error, reply));
     };
+
+    getAllRoutes = (request: FastifyRequest, reply: FastifyReply) => {
+        this.shipmentRepository
+            .getAllRoutes()
+            .then((response) => reply.status(200).send(response))
+            .catch((error) => handlerError(error, reply));
+    };
 }

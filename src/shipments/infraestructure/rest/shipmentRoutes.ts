@@ -12,6 +12,7 @@ import {
     sendPackageSchema,
     assignShipmentToCarrierSchema,
     getShipmentByTrackingCode,
+    getAllRoutesSchema,
 } from '@src/shipments/infraestructure/docs';
 
 const database = new MysqlShipmentRepository();
@@ -73,6 +74,18 @@ export const shipmentRoutes = (
             schema: getShipmentByTrackingCode,
         },
         controller.getShipmentByTrakingCode,
+    );
+
+    fastify.get(
+        '/routes/all',
+        {
+            onRequest: [
+                AuthMiddleware.validateJwtToken,
+                AuthMiddleware.validateAdmin,
+            ],
+            schema: getAllRoutesSchema,
+        },
+        controller.getAllRoutes,
     );
 
     done();

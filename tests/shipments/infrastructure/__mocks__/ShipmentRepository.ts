@@ -4,6 +4,7 @@ import { Carrier } from '@src/shipments/domain/entities/carrier.entity';
 import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarrier.entity';
 import { CustomError } from '@src/common/errors/custom.error';
 import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
+import { Routes } from '@src/shipments/domain/entities/routes.entity';
 
 export class ShipmentRepository {
     private shipments: Shipment[] = [
@@ -23,9 +24,7 @@ export class ShipmentRepository {
             'trakinCode',
         ),
     ];
-    private routes = [
-        { origin: 'Manizales', destination: 'Bogota', carrier_id: 1 },
-    ];
+    private routes = [new Routes(1, 'Manizales', 'Bogota', 1)];
     private carriers: Carrier[] = [
         new Carrier(1, 'Jhon Doe', 12345, 'Camioneta', 100),
     ];
@@ -112,5 +111,9 @@ export class ShipmentRepository {
                 ],
             ),
         );
+    }
+
+    async getAllRoutes(): Promise<Routes[]> {
+        return Promise.resolve(this.routes);
     }
 }

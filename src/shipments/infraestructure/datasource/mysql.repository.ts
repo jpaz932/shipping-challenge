@@ -12,6 +12,8 @@ import { CarrierMapper } from '@src/shipments/infraestructure/mapper/carrier.map
 import { AssigmentShipmentToCarrierMapper } from '../mapper/assigmentShipmentToCarrier';
 import { ShipmentsHistoryMapper } from '@src/shipments/infraestructure/mapper/shipmentHistory.mapper';
 import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
+import { RouteMapper } from '@src/shipments/infraestructure/mapper/routesMapper';
+import { Routes } from '@src/shipments/domain/entities/routes.entity';
 
 export class MysqlShipmentRepository implements ShipmentRepository {
     private pool: Pool | null = null;
@@ -66,6 +68,17 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             return rows.map((row) =>
                 CarrierMapper.carrierEntityFromObject(row),
             );
+        } catch (error) {
+            throw CustomError.internalServerError((error as Error).message);
+        }
+    };
+
+    getAllRoutes = async (): Promise<Routes[]> => {
+        try {
+            const sql = 'SELECT * FROM routes where status = TRUE';
+            const [rows] = await this.getPool().execute<RowDataPacket[]>(sql);
+
+            return rows.map((row) => RouteMapper.routesEntityFromObject(row));
         } catch (error) {
             throw CustomError.internalServerError((error as Error).message);
         }
@@ -213,6 +226,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 SELECT r.* FROM routes r
                 LEFT JOIN carriers c ON c.id = r.carrier_id
                 WHERE r.origin LIKE ? AND r.destination LIKE ?
+                AND r.status = TRUE
                 AND (
                     r.carrier_id IS NULL
                     OR c.vehicle_capacity >= ? + (

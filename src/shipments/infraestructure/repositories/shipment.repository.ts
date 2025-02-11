@@ -5,6 +5,7 @@ import { IShipmentRepository } from '@src/shipments/domain/interfaces/shipment.i
 import { ShipmentRepository } from '@src/shipments/domain/repositories/shipment.repository';
 import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarrier.entity';
 import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
+import { Routes } from '@src/shipments/domain/entities/routes.entity';
 
 export class ShipmentRepositoryImpl implements IShipmentRepository {
     constructor(
@@ -33,5 +34,9 @@ export class ShipmentRepositoryImpl implements IShipmentRepository {
         return this.shipmentDatasourceRepository.getShipmentByTrackingCode(
             trackingCode,
         );
+    }
+
+    getAllRoutes(): Promise<Routes[]> {
+        return this.shipmentDatasourceRepository.getAllRoutes();
     }
 }
