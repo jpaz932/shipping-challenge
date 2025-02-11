@@ -1,5 +1,5 @@
 export const getAllRoutesSchema = {
-    tags: ['Shipments'],
+    tags: ['Routes'],
     description: 'Permite consultar todas las rutas activas',
     summary: 'Obtiene todas las rutas',
     response: {

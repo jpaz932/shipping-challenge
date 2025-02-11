@@ -5,6 +5,7 @@ import { ShipmentToCarrier } from '@src/shipments/domain/entities/shipmentToCarr
 import { CustomError } from '@src/common/errors/custom.error';
 import { ShipmentHistory } from '@src/shipments/domain/entities/ShipmentHistory.entity';
 import { Routes } from '@src/shipments/domain/entities/routes.entity';
+import { StatusRouteDto } from '@src/shipments/domain/dto/routeDto';
 
 export class ShipmentRepository {
     private shipments: Shipment[] = [
@@ -28,6 +29,14 @@ export class ShipmentRepository {
     private carriers: Carrier[] = [
         new Carrier(1, 'Jhon Doe', 12345, 'Camioneta', 100),
     ];
+
+    private shipmentHistory: {
+        shipment_id: number;
+        carrier_id: number;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+    }[] = [];
 
     async sendPackage(shipmentDto: ShipmentDto): Promise<Shipment> {
         const shipment = new Shipment(
@@ -115,5 +124,22 @@ export class ShipmentRepository {
 
     async getAllRoutes(): Promise<Routes[]> {
         return Promise.resolve(this.routes);
+    }
+
+    async changeRouteStatus(
+        statusRouteDto: StatusRouteDto,
+    ): Promise<{ message: string; status: string }> {
+        this.shipmentHistory.push({
+            shipment_id: 1,
+            carrier_id: 1,
+            status: statusRouteDto.status,
+            created_at: new Date(),
+            updated_at: new Date(),
+        });
+
+        return Promise.resolve({
+            message: 'Status updated',
+            status: statusRouteDto.status,
+        });
     }
 }

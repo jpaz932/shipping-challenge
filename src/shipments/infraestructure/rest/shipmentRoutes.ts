@@ -13,7 +13,9 @@ import {
     assignShipmentToCarrierSchema,
     getShipmentByTrackingCode,
     getAllRoutesSchema,
+    changeStatusRouteSchema,
 } from '@src/shipments/infraestructure/docs';
+import { StatusRouteDto } from '@src/shipments/domain/dto/routeDto';
 
 const database = new MysqlShipmentRepository();
 const shipmentRepository = new ShipmentRepositoryImpl(database);
@@ -86,6 +88,19 @@ export const shipmentRoutes = (
             schema: getAllRoutesSchema,
         },
         controller.getAllRoutes,
+    );
+
+    fastify.post(
+        '/routes/status',
+        {
+            onRequest: [
+                AuthMiddleware.validateJwtToken,
+                AuthMiddleware.validateAdmin,
+            ],
+            preHandler: [validateDto(StatusRouteDto)],
+            schema: changeStatusRouteSchema,
+        },
+        controller.changeRouteStatus,
     );
 
     done();
