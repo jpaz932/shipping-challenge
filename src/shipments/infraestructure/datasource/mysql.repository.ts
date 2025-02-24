@@ -223,9 +223,9 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             const cached = await this.getCached(cacheKey);
 
             if (cached) {
-                return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject([
-                    cached,
-                ]);
+                return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject(
+                    Array.isArray(cached) ? cached : [cached],
+                );
             }
 
             const sql = `SELECT s.tracking_code, s.origin_city, s.destination_city, sh.status, sh.created_at 
@@ -240,7 +240,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
             );
 
             if (rows[0]) {
-                await this.setCached(cacheKey, rows[0]);
+                await this.setCached(cacheKey, rows);
                 return ShipmentsHistoryMapper.shipmentHistoryEntityFromObject(
                     rows,
                 );
@@ -314,6 +314,8 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 ]);
             }
 
+            await this.invalidateCache(`shipments:all`);
+
             return { message: 'Status updated successfully', status };
         } catch (error) {
             throw CustomError.internalServerError((error as Error).message);
@@ -333,7 +335,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
 
             if (!rows.length) {
                 throw CustomError.badRequest(
-                    'The route has no shipments assigned',
+                    'The route has no shipments assigned or does not exist',
                 );
             }
 
