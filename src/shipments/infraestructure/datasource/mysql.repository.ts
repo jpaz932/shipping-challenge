@@ -74,6 +74,15 @@ export class MysqlShipmentRepository implements ShipmentRepository {
 
     getAllShipments = async (request: FastifyRequest): Promise<Shipment[]> => {
         try {
+            const cacheKey = `shipments:all`;
+            const cached = await this.getCached(cacheKey);
+
+            if (cached) {
+                return (cached as RowDataPacket[]).map((row) =>
+                    ShipmentMapper.shipmentEntityFromObject(row),
+                );
+            }
+
             const sql =
                 request.role === 'Admin'
                     ? 'SELECT * FROM shipments'
@@ -85,6 +94,12 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 values,
             );
 
+            if (rows[0]) {
+                await this.setCached(cacheKey, rows);
+                return rows.map((row) =>
+                    ShipmentMapper.shipmentEntityFromObject(row),
+                );
+            }
             return rows.map((row) =>
                 ShipmentMapper.shipmentEntityFromObject(row),
             );
@@ -350,6 +365,7 @@ export class MysqlShipmentRepository implements ShipmentRepository {
                 { sql },
                 values,
             );
+            await this.invalidateCache(`shipments:all`);
             return result.insertId;
         } catch (error: any) {
             throw CustomError.internalServerError((error as Error).message);
